@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Package Builder — SQL Datafix Package Maker for Yardi Systems."
+    />
+    <title>Package Builder</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --bg: #d0d3d8;
+        --surface: #ffffff;
+        --surface-2: #f6f8fa;
+        --border: #d8dee4;
+        --border-hi: #c4cdd6;
+        --accent: #2563eb;
+        --accent-dim: rgba(37, 99, 235, 0.1);
+        --text: #0f1729;
+        --muted: #374151;
+        --dim: #8a9ab0;
+        --green: #166534;
+        --green-hi: #15803d;
+        --r: 7px;
+        --r-lg: 12px;
+      }
+
+      html,
+      body {
+        height: 100%;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+          "Helvetica Neue", Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        font-size: 15px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        min-height: 100vh;
+        padding: 1.5rem 1.25rem;
+      }
+
+      .wrapper {
+        width: 100%;
+        max-width: 1100px;
+      }
+
+      /* ── Header ── */
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.1rem;
+        padding-bottom: 0.9rem;
+        border-bottom: 1px solid var(--border);
+      }
+      .header-brand {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(140deg, #4f9eff 0%, #2270e0 100%);
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.5px;
+        flex-shrink: 0;
+        box-shadow: 0 2px 10px rgba(56, 139, 253, 0.4);
+      }
+      .brand-name {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+      .brand-tagline {
+        font-size: 0.7rem;
+        color: #4a5568;
+        margin-top: 1px;
+      }
+      .header-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: var(--surface);
+        border: 1px solid var(--border-hi);
+        border-radius: 20px;
+        padding: 0.3rem 0.8rem;
+        font-size: 0.72rem;
+        color: var(--muted);
+      }
+      .pill-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex-shrink: 0;
+      }
+
+      /* ── Card internal two-column layout ── */
+      .card-columns {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+      }
+      .cred-col {
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+      }
+      .form-col {
+        display: flex;
+        flex-direction: column;
+      }
+      .cred-section {
+        padding: 1.3rem 1.1rem 1.1rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+      .cred-section .section-label {
+        color: #1a1a1a;
+        opacity: 1;
+      }
+      #credInput {
+        flex: 1;
+        width: 100%;
+        min-height: 125px;
+        resize: none;
+        font-family: ui-monospace, "Cascadia Code", "Courier New", monospace;
+        font-size: 0.76rem;
+        line-height: 1.75;
+        background: var(--surface-2);
+        border: 1px solid var(--border-hi);
+        border-radius: var(--r);
+        color: var(--text);
+        padding: 0.6rem 0.75rem;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+        margin-bottom: 0.75rem;
+      }
+      #credInput:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-dim);
+      }
+      #credInput::placeholder {
+        color: var(--dim);
+        font-style: italic;
+      }
+      .cred-hint {
+        font-size: 0.7rem;
+        color: var(--dim);
+        margin-bottom: 0.65rem;
+        line-height: 1.5;
+      }
+
+      /* ── Card ── */
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r-lg);
+        overflow: hidden;
+        box-shadow:
+          0 2px 16px rgba(0, 0, 0, 0.08),
+          0 1px 4px rgba(0, 0, 0, 0.05);
+      }
+      .card-accent {
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          #2063cc 0%,
+          #58a6ff 50%,
+          #2063cc 100%
+        );
+      }
+
+      /* ── Sections ── */
+      .section {
+        padding: 0.95rem 1.4rem;
+      }
+      .section + .section {
+        border-top: 1px solid var(--border);
+      }
+
+      .section-label {
+        font-size: 0.67rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--accent);
+        opacity: 0.8;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        gap: 0.55rem;
+      }
+
+      /* ── Grid ── */
+      .row-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.8rem;
+      }
+      .row-1 {
+        display: block;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--muted);
+        user-select: none;
+      }
+
+      input,
+      textarea {
+        background: linear-gradient(135deg, #ffffff 0%, #f7f9ff 100%);
+        border: 1.5px solid #d0d8e8;
+        border-radius: var(--r);
+        color: var(--text);
+        font-family: inherit;
+        font-size: 0.9rem;
+        padding: 0.5rem 0.78rem;
+        outline: none;
+        box-shadow: 0 1px 4px rgba(60,80,140,0.06), inset 0 1px 2px rgba(255,255,255,0.8);
+        transition: border-color 0.18s, box-shadow 0.18s;
+        width: 100%;
+      }
+      input::placeholder,
+      textarea::placeholder {
+        color: var(--dim);
+      }
+      input:focus,
+      textarea:focus {
+        border-color: #4a7fcb;
+        box-shadow: 0 0 0 3px rgba(74,127,203,0.18), 0 1px 4px rgba(60,80,140,0.08);
+      }
+      textarea {
+        resize: vertical;
+        min-height: 90px;
+        font-family: ui-monospace, "Cascadia Code", "Courier New", monospace;
+        font-size: 0.84rem;
+        line-height: 1.6;
+      }
+
+      /* ── Form action bar ── */
+      .form-footer {
+        padding: 0.8rem 1.4rem;
+        background: var(--surface-2);
+        border-top: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+      }
+      .form-footer-note {
+        font-size: 0.72rem;
+        color: var(--dim);
+      }
+      .form-footer-note code {
+        font-family: ui-monospace, monospace;
+        color: var(--muted);
+      }
+
+      /* ── Buttons ── */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        border: none;
+        border-radius: var(--r);
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 500;
+        cursor: pointer;
+        padding: 0.55rem 1.2rem;
+        transition:
+          background 0.15s,
+          border-color 0.15s,
+          color 0.15s;
+        white-space: nowrap;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+        box-shadow: 0 1px 5px rgba(56, 139, 253, 0.3);
+      }
+      .btn-primary:hover {
+        background: #3b82f6;
+      }
+      .btn-primary:active {
+        background: #2f7de1;
+        box-shadow: none;
+      }
+      .btn-dark {
+        background: #1a1a1a;
+        color: #fff;
+      }
+      .btn-dark:hover {
+        background: #333;
+      }
+      .btn-dark:active {
+        background: #000;
+      }
+      .btn-success {
+        background: var(--green);
+        color: #fff;
+      }
+      .btn-success:hover {
+        background: var(--green-hi);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--muted);
+        border: 1px solid var(--border-hi);
+      }
+      .btn-ghost:hover {
+        color: var(--text);
+        border-color: var(--dim);
+      }
+      .btn-block {
+        width: 100%;
+      }
+
+      /* ── Result view ── */
+      .result-view {
+        padding: 3rem 2rem;
+        text-align: center;
+      }
+      .result-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 20px;
+        padding: 0.35rem 1rem 0.35rem 0.65rem;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: #166534;
+        margin-bottom: 1.4rem;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #16a34a;
+        border-radius: 50%;
+      }
+      .result-view h2 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 0.35rem;
+        letter-spacing: -0.02em;
+      }
+      .result-view > p {
+        font-size: 0.82rem;
+        color: var(--muted);
+        margin-bottom: 1.4rem;
+      }
+      .result-file-block {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.65rem;
+        background: var(--surface-2);
+        border: 1px solid var(--border-hi);
+        border-radius: var(--r);
+        padding: 0.65rem 1.1rem;
+        margin-bottom: 1.6rem;
+      }
+      .file-icon {
+        width: 28px;
+        height: 28px;
+        background: var(--accent-dim);
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .result-file-block code {
+        font-family: ui-monospace, "Cascadia Code", "Courier New", monospace;
+        font-size: 0.84rem;
+        color: var(--text);
+        word-break: break-all;
+      }
+      .result-actions-wrap {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 1.1rem;
+      }
+      .result-actions-inner {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: stretch;
+      }
+      .result-actions {
+        display: flex;
+        gap: 0.65rem;
+      }
+      .result-disclaimer {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #7d5a00;
+        background: #fffbea;
+        border: 1px solid #f0d060;
+        border-radius: 6px;
+        padding: 0.45rem 0.9rem;
+        text-align: center;
+      }
+
+      /* ── Footer ── */
+      .footer {
+        margin-top: 0.9rem;
+        text-align: center;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #1a1a2e;
+      }
+
+      @media (max-width: 800px) {
+        .card-columns {
+          grid-template-columns: 1fr;
+        }
+        .cred-col {
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+        }
+      }
+      @media (max-width: 660px) {
+        .row-4 {
+          grid-template-columns: 1fr 1fr;
+        }
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.75rem;
+        }
+      }
+      @media (max-width: 400px) {
+        .row-4 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="header">
+        <div class="header-brand">
+          <div class="brand-mark">🗒️</div>
+          <div class="brand-text">
+            <div class="brand-name">Package Builder</div>
+            <div class="brand-tagline">Yardi SQL Datafix Package Maker</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form card -->
+      <div class="card" id="formCard">
+        <div class="card-accent"></div>
+        <form id="pkgForm" autocomplete="off">
+          <div class="card-columns">
+            <!-- Left: Emailed Credentials -->
+            <div class="cred-col">
+              <div class="cred-section">
+                <div class="section-label">Emailed Credentials</div>
+                <textarea
+                  id="credInput"
+                  placeholder="Client Pin: 1234567890&#10;Client Name: ABC PropertiesLLC&#10;User Name: 12345678_010125&#10;Password: aB3cD4eF&#10;DB Server: PCZ001DB001&#10;Instance: PCZ001DB001&#10;DB Name: abc_live"
+                ></textarea>
+                <button
+                  type="button"
+                  class="btn btn-dark btn-block"
+                  id="autoFillBtn"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 3v13M5 13l7 7 7-7"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  Auto Fill
+                </button>
+              </div>
+            </div>
+
+            <!-- Right: Form fields -->
+            <div class="form-col">
+              <div class="section">
+                <div class="section-label">Case Information</div>
+                <div class="row-4">
+                  <div class="field">
+                    <label for="createdBy">Created By</label>
+                    <input
+                      type="text"
+                      id="createdBy"
+                      placeholder="Your Name"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="caseId">Case #</label>
+                    <input
+                      type="text"
+                      id="caseId"
+                      placeholder="12345678"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="clientPin">Client PIN</label>
+                    <input
+                      type="text"
+                      id="clientPin"
+                      placeholder="1234567890"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="clientName">Client Name</label>
+                    <input
+                      type="text"
+                      id="clientName"
+                      placeholder="ABC Properties LLC"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="section">
+                <div class="section-label">Database Credentials</div>
+                <div class="row-4">
+                  <div class="field">
+                    <label for="dbUsername">Username</label>
+                    <input
+                      type="text"
+                      id="dbUsername"
+                      placeholder="12345678_01012001"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="dbPassword">Password</label>
+                    <input
+                      type="text"
+                      id="dbPassword"
+                      placeholder="a1B2c3D4"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="dbServer">Server</label>
+                    <input
+                      type="text"
+                      id="dbServer"
+                      placeholder="PCZ001DB001"
+                    />
+                  </div>
+                  <div class="field">
+                    <label for="dbName">Database Name</label>
+                    <input
+                      type="text"
+                      id="dbName"
+                      placeholder="abc_live"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="section">
+                <div class="section-label">Description</div>
+                <div class="row-1">
+                  <div class="field">
+                    <input
+                      type="text"
+                      id="description"
+                      placeholder="Brief description of this datafix package"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div class="section">
+                <div class="section-label">SQL Queries</div>
+                <div class="row-1">
+                  <div class="field">
+                    <textarea
+                      id="sqlQueries"
+                      placeholder="Paste SQL queries here"
+                    ></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-footer" style="justify-content: flex-end">
+            <button type="submit" class="btn btn-primary">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M5 12h14M12 5l7 7-7 7"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+              Generate Package
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Result card -->
+      <div class="card" id="resultCard" style="display: none">
+        <div class="card-accent"></div>
+        <div class="result-view">
+          <div class="result-status">
+            <span class="status-dot"></span>
+            Package ready
+          </div>
+          <h2>Generation complete</h2>
+          <p>Your datafix package has been built and is ready to download.</p>
+          <div class="result-file-block">
+            <div class="file-icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  stroke="#388bfd"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <polyline
+                  points="14 2 14 8 20 8"
+                  stroke="#388bfd"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </div>
+            <code id="resultFilename"></code>
+          </div>
+          <div class="result-actions-wrap">
+            <div class="result-actions-inner">
+              <div class="result-actions">
+                <button class="btn btn-success" id="dlBtn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 3v13M5 13l7 7 7-7"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                    <path
+                      d="M4 20h16"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+                  Download Pkg
+                </button>
+                <button class="btn btn-ghost" id="backBtn">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M19 12H5M5 12l7 7M5 12l7-7"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    />
+                  </svg>
+                  New Package
+                </button>
+              </div>
+              <div class="result-disclaimer">Kindly Validate the package at your end.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer" id="siteFooter">Developed by Giriraj Parik</div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        function getCurrentDate() {
+          const d = new Date();
+          return (
+            String(d.getMonth() + 1).padStart(2, "0") +
+            "/" +
+            String(d.getDate()).padStart(2, "0") +
+            "/" +
+            d.getFullYear()
+          );
+        }
+
+        function splitWhereClause(s) {
+          const result = [];
+          let token = "",
+            inQuotes = false,
+            bracketDepth = 0;
+          for (let i = 0; i < s.length; i++) {
+            const ch = s[i];
+            if (ch === '"' && bracketDepth === 0) {
+              if (!inQuotes && token) {
+                result.push(token);
+                token = "";
+              }
+              inQuotes = !inQuotes;
+              token += ch;
+              if (!inQuotes) {
+                result.push(token);
+                token = "";
+              }
+              continue;
+            }
+            if (ch === "[" && !inQuotes) {
+              if (bracketDepth === 0 && token) {
+                result.push(token);
+                token = "";
+              }
+              bracketDepth++;
+              token += ch;
+              continue;
+            }
+            if (ch === "]" && !inQuotes) {
+              bracketDepth--;
+              token += ch;
+              if (bracketDepth === 0) {
+                result.push(token);
+                token = "";
+              }
+              continue;
+            }
+            if (ch === " " && !inQuotes && bracketDepth === 0) {
+              if (token) {
+                result.push(token);
+                token = "";
+              }
+            } else {
+              token += ch;
+            }
+          }
+          if (token) result.push(token);
+          return result;
+        }
+
+        function isSqlStatementStart(line) {
+          const lineLower = line.toLowerCase();
+          return [
+            "update ",
+            "delete ",
+            "exec ",
+            "execute ",
+            "drop ",
+            "alter ",
+          ].some(function (k) { return lineLower.startsWith(k); });
+        }
+
+        function getQueryType(query) {
+          const lineLower = query.trim().toLowerCase();
+          if (lineLower.startsWith("update ")) return "UPDATE";
+          if (lineLower.startsWith("delete ")) return "DELETE";
+          if (lineLower.startsWith("exec ") || lineLower.startsWith("execute ")) return "EXEC";
+          if (lineLower.startsWith("drop ")) return "DROP";
+          if (lineLower.startsWith("alter ")) return "ALTER";
+          return "UNKNOWN";
+        }
+
+        function getForeignKeyColumn(tableName) {
+          tableName = tableName.toLowerCase();
+          if (tableName === "tenant" || tableName === "vendor" || tableName === "customer")
+            return "hmyperson";
+          if (tableName === "listprop2" || tableName === "listprop4") return "hproperty";
+          return "hmy";
+        }
+
+        function findFirstEquals(s) {
+          for (let i = 0; i < s.length; i++) {
+            if (s[i] !== "=") continue;
+            if (i > 0 && "<>!".includes(s[i - 1])) continue;
+            if (i < s.length - 1 && s[i + 1] === "=") continue;
+            return i;
+          }
+          return -1;
+        }
+
+        function smartSplitSetClause(setClause) {
+          const parts = [];
+          let current = "",
+            depth = 0,
+            inString = false,
+            stringChar = null;
+          for (let i = 0; i < setClause.length; i++) {
+            const c = setClause[i];
+            if (!inString && (c === "'" || c === '"')) {
+              inString = true;
+              stringChar = c;
+              current += c;
+            } else if (inString && c === stringChar) {
+              inString = false;
+              stringChar = null;
+              current += c;
+            } else if (!inString && c === "(") {
+              depth++;
+              current += c;
+            } else if (!inString && c === ")") {
+              depth--;
+              current += c;
+            } else if (c === "," && !inString && depth === 0) {
+              parts.push(current);
+              current = "";
+            } else {
+              current += c;
+            }
+          }
+          if (current) parts.push(current);
+          return parts;
+        }
+
+        function parseSetClause(setClause) {
+          return smartSplitSetClause(setClause).reduce(function (updates, part) {
+            part = part.trim();
+            const eqPos = findFirstEquals(part);
+            if (eqPos > 0) updates.push([part.slice(0, eqPos).trim(), part.slice(eqPos + 1).trim()]);
+            return updates;
+          }, []);
+        }
+
+        function extractUpdateTableInfo(query) {
+          const querySingle = query.replace(/\s+/g, " ");
+          const m = querySingle.match(/update\s+(\w+)\s+set\s+/i);
+          if (!m) return null;
+          let tableName = m[1],
+            setStart = m.index + m[0].length,
+            depth = 0,
+            fromPos = null,
+            wherePos = null;
+          for (let i = setStart; i < querySingle.length; i++) {
+            const c = querySingle[i];
+            if (c === "(") {
+              depth++;
+              continue;
+            }
+            if (c === ")") {
+              depth--;
+              continue;
+            }
+            if (depth !== 0) continue;
+            if (querySingle.slice(i, i + 5).toLowerCase() === "from ") {
+              fromPos = i;
+              break;
+            }
+            if (querySingle.slice(i, i + 6).toLowerCase() === "where ") {
+              wherePos = i;
+              break;
+            }
+          }
+          let setClause, whereClause;
+          if (fromPos !== null) {
+            setClause = querySingle.slice(setStart, fromPos).trim();
+            whereClause = querySingle.slice(fromPos).trim();
+            const whereClauseList = splitWhereClause(whereClause.toLowerCase()),
+              tn = tableName.toLowerCase(),
+              ix = whereClauseList.indexOf(tn);
+            if (ix > 0 && whereClauseList[ix - 1] !== "join" && whereClauseList[ix - 1] !== "from") {
+              if (whereClauseList[ix - 1] === "as" && ix > 1) tableName = whereClauseList[ix - 2];
+              else if (whereClauseList[ix - 1] !== "as") tableName = whereClauseList[ix - 1];
+            }
+          } else if (wherePos !== null) {
+            setClause = querySingle.slice(setStart, wherePos).trim();
+            whereClause = querySingle.slice(wherePos).trim();
+          } else {
+            setClause = querySingle.slice(setStart).trim();
+            whereClause = "";
+          }
+          return { tableName: tableName, setClause: setClause, whereClause: whereClause };
+        }
+
+        function generateUpdateBackup(query, caseId) {
+          const info = extractUpdateTableInfo(query);
+          if (!info) return [];
+          const tableName = info.tableName,
+            setClause = info.setClause,
+            whereClause = info.whereClause,
+            columnUpdates = parseSetClause(setClause);
+          let fkColumn = getForeignKeyColumn(tableName);
+          if (whereClause && /^f/i.test(whereClause)) {
+            const whereClauseList = splitWhereClause(whereClause.toLowerCase()),
+              tn = tableName.toLowerCase(),
+              ix = whereClauseList.indexOf(tn);
+            if (ix !== -1) {
+              let aliasName = tn,
+                ln = whereClauseList.length;
+              if (ix + 2 < ln && whereClauseList[ix + 1] === "as") aliasName = whereClauseList[ix + 2];
+              else if (ix + 1 < ln) {
+                const nxt = whereClauseList[ix + 1];
+                if (
+                  ![
+                    "on",
+                    "inner",
+                    "left",
+                    "right",
+                    "outer",
+                    "join",
+                    "full",
+                    "from",
+                    "where",
+                  ].includes(nxt)
+                )
+                  aliasName = nxt;
+              }
+              if (/\bjoin\b/i.test(whereClause)) fkColumn = aliasName + "." + fkColumn;
+            }
+          }
+          return columnUpdates.map(function (colPair) {
+            const colName = colPair[0], newValue = colPair[1];
+            const colName_ = colName.includes(".") ? colName.split(".").pop() : colName;
+            let s = "Insert into DatafixHistory (hycrm, sTableName, sColumnName, hForeignKey, sNotes, sNewValue, sOldValue, dtdate)\n";
+            s += "(Select '" + caseId + "', '" + tableName + "', '" + colName_ + "', " + fkColumn + ", 'Updating " + colName_ + "', " + newValue + ", " + colName + ", getdate() \n";
+            if (whereClause && !/^f/i.test(whereClause)) s += "from " + tableName;
+            if (whereClause) s += " " + whereClause;
+            return s + "\n)";
+          });
+        }
+
+        function extractTableFromDelete(query) {
+          const match = query.match(/delete\s+(?:from\s+)?(\w+)/i);
+          let tableName = match ? match[1] : "";
+          const whereMatch = query.match(/\bfrom\b.*$/is);
+          let whereClauseList = splitWhereClause((whereMatch ? whereMatch[0] : "").toLowerCase());
+          if (whereClauseList.length > 2 && whereClauseList[2] === "from") whereClauseList = whereClauseList.slice(2);
+          const tableNameLower = tableName.toLowerCase();
+          if (whereClauseList.includes(tableNameLower)) {
+            const ix = whereClauseList.indexOf(tableNameLower);
+            if (ix > 0 && whereClauseList[ix - 1] !== "join" && whereClauseList[ix - 1] !== "from") {
+              if (whereClauseList[ix - 1] === "as" && ix > 1) tableName = whereClauseList[ix - 2];
+              else if (whereClauseList[ix - 1] !== "as") tableName = whereClauseList[ix - 1];
+            }
+          }
+          return match ? tableName : "";
+        }
+
+        function generateDeleteBackup(query, caseId, tableName, count) {
+          const whereMatch = query.match(/\bfrom\b.*$/is);
+          let whereClause = whereMatch ? whereMatch[0] : "",
+            thirdWordFrom = false;
+          let fkColumn = getForeignKeyColumn(tableName),
+            aliasName = tableName;
+          if (whereClause && /^f/i.test(whereClause)) {
+            let whereList = splitWhereClause(whereClause.toLowerCase());
+            if (whereList.length > 2 && whereList[2] === "from") {
+              whereList = whereList.slice(2);
+              thirdWordFrom = true;
+            }
+            const tn = tableName.toLowerCase(),
+              ix = whereList.indexOf(tn);
+            if (ix !== -1) {
+              aliasName = tn;
+              const ln = whereList.length;
+              if (ix + 2 < ln && whereList[ix + 1] === "as") aliasName = whereList[ix + 2];
+              else if (ix + 1 < ln) {
+                const nxt = whereList[ix + 1];
+                if (
+                  ![
+                    "on",
+                    "inner",
+                    "left",
+                    "right",
+                    "outer",
+                    "join",
+                    "full",
+                    "where",
+                    "from",
+                  ].includes(nxt)
+                )
+                  aliasName = nxt;
+              }
+              if (/\bjoin\b/i.test(whereClause)) fkColumn = aliasName + "." + fkColumn;
+            }
+          }
+          const backupTable = count === 0 ? tableName + "_" + caseId : tableName + "_" + count + "_" + caseId;
+          let stmt = "Insert into DatafixHistory (hycrm, sTableName, sColumnName, hForeignKey, sNotes, sNewValue, sOldValue, dtdate)\n";
+          stmt += "(Select '" + caseId + "', '" + tableName + "',''" + "," + fkColumn + ", 'Deleting records (Backup table : " + backupTable + ")','','', getdate() \n";
+          let backupStmt = /\bjoin\b/i.test(whereClause)
+            ? "select " + aliasName + ".* into " + backupTable
+            : "select * into " + backupTable;
+          if (whereClause) {
+            const sfx = thirdWordFrom
+              ? splitWhereClause(whereClause.toLowerCase()).slice(2).join(" ")
+              : whereClause;
+            stmt += " " + sfx;
+            backupStmt += " " + sfx;
+          }
+          return [stmt + "\n)", backupStmt];
+        }
+
+        function generateDropBackup(caseId, tableName, count) {
+          const backupTable = count === 0 ? tableName + "_" + caseId : tableName + "_" + count + "_" + caseId,
+            fkColumn = getForeignKeyColumn(tableName);
+          return [
+            "Insert into DatafixHistory (hycrm, sTableName, sColumnName, hForeignKey, sNotes, sNewValue, sOldValue, dtdate)\n(Select '" + caseId + "', '" + tableName + "',''" + "," + fkColumn + ", 'Dropping table (Backup table : " + backupTable + ")','','', getdate() \nfrom " + tableName + "\n)",
+            "select * into " + backupTable + " from " + tableName,
+          ];
+        }
+
+        function generateAlterDropBackup(columnName, caseId, tableName, count) {
+          const backupTable = count === 0 ? tableName + "_" + caseId : tableName + "_" + count + "_" + caseId,
+            fkColumn = getForeignKeyColumn(tableName);
+          return [
+            "Insert into DatafixHistory (hycrm, sTableName, sColumnName, hForeignKey, sNotes, sNewValue, sOldValue, dtdate)\n(Select '" + caseId + "', '" + tableName + "','" + columnName + "'," + fkColumn + ", 'Dropping column " + columnName + " (Backup table : " + backupTable + ")',''" + "," + columnName + ", getdate() \nfrom " + tableName + "\n)",
+            "select * into " + backupTable + " from " + tableName,
+          ];
+        }
+
+        function generateDeleteReceiptBackup(query, caseId, countT, countD, countG) {
+          const receiptId = query.trim().split(/\s+/).pop(),
+            statements = [];
+          const glBackupTable =
+            countG === 0 ? "gldetail_" + caseId : "gldetail_" + countG + "_" + caseId;
+          statements.push(
+            "Insert into DatafixHistory (hycrm, sTableName, sColumnName, hForeignKey, sNotes, sNewValue, sOldValue, dtdate)\n(Select '" + caseId + "', 'gldetail','',hmy, 'Deleting records (Backup table : " + glBackupTable + ")','','', getdate() \nfrom gldetail where htran = " + receiptId + "\n)",
+            "select * into " + glBackupTable + " from gldetail where htran = " + receiptId,
+          );
+          const detailBackupTable = countD === 0 ? "detail_" + caseId : "detail_" + countD + "_" + caseId;
+          statements.push(
+            "Insert into DatafixHistory (hycrm, sTableName, sColumnName, hForeignKey, sNotes, sNewValue, sOldValue, dtdate)\n(Select '" + caseId + "', 'detail','',hmy, 'Deleting records (Backup table : " + detailBackupTable + ")','','', getdate()  \nfrom detail where hinvorrec = " + receiptId + "\n)",
+            "select * into " + detailBackupTable + " from detail where hinvorrec = " + receiptId,
+          );
+          const transBackupTable = countT === 0 ? "trans_" + caseId : "trans_" + countT + "_" + caseId;
+          statements.push(
+            "Insert into DatafixHistory (hycrm, sTableName, sColumnName, hForeignKey, sNotes, sNewValue, sOldValue, dtdate)\n(Select '" + caseId + "', 'trans','',hmy, 'Deleting records (Backup table : " + transBackupTable + ")','','', getdate() \nfrom trans where hmy = " + receiptId + "\n)",
+            "select * into " + transBackupTable + " from trans where hmy = " + receiptId,
+          );
+          return statements;
+        }
+
+        function extractSqlQueries(lines) {
+          const queries = [],
+            blankPosSet = new Set([-1]);
+          let currentQueryLines = [],
+            inQuery = false,
+            firstQueryPos = -1;
+          const metadataPrefixes = [
+            "created by",
+            "case#",
+            "case #",
+            "client pin",
+            "client name",
+            "database:",
+          ];
+          for (let i = 0; i < lines.length; i++) {
+            const lineStripped = lines[i].trim(),
+              lineLower = lineStripped.toLowerCase();
+            if (firstQueryPos === -1 && inQuery) firstQueryPos = i - 1;
+            if (lineLower === "" && firstQueryPos !== -1) blankPosSet.add(i - firstQueryPos);
+            if (metadataPrefixes.some(function (p) { return lineLower.startsWith(p); })) continue;
+            if (isSqlStatementStart(lineStripped)) {
+              if (currentQueryLines.length) {
+                const q = currentQueryLines.join("\n").trim();
+                if (q) queries.push(q);
+                currentQueryLines = [];
+              }
+              currentQueryLines.push(lineStripped);
+              inQuery = true;
+            } else if (inQuery && lineStripped) {
+              currentQueryLines.push(lineStripped);
+            }
+          }
+          if (currentQueryLines.length) {
+            const q = currentQueryLines.join("\n").trim();
+            if (q) queries.push(q);
+          }
+          return [queries, blankPosSet];
+        }
+
+        function generateOutput(metadata, sqlResult) {
+          const queries = sqlResult[0],
+            blankPosSet = sqlResult[1],
+            out = [];
+          out.push("//Notes");
+          out.push("Client Pin     : " + metadata.clientPin);
+          out.push("Client Name    : " + metadata.clientName);
+          out.push("User Name      : " + metadata.username);
+          out.push("Password       : " + metadata.password);
+          out.push("DB Server      : " + metadata.dbServer);
+          out.push("Instance       : " + metadata.dbServer);
+          out.push("DB Name        : " + metadata.dbName);
+          out.push("", "");
+          out.push("Created By     : " + metadata.createdBy);
+          out.push("Date           : " + getCurrentDate());
+          out.push("Case#          : " + metadata.caseId);
+          if (metadata.description)
+            out.push("Description    : " + metadata.description);
+          out.push("//End Notes", "", "");
+          out.push("//SQL", "GO");
+          out.push(
+            "If Not Exists (Select Name From SysObjects Where Name = 'DataFixHistory')",
+          );
+          out.push("        Create Table DataFixHistory", "        (");
+          out.push("                hMy NUMERIC(18,0) IDENTITY(1,1) Not Null,");
+          out.push("                hyCRM NUMERIC (18,0) Not Null,");
+          out.push("                sTableName VARCHAR(400) Not Null,");
+          out.push("                sColumnName VARCHAR(400) Not Null,");
+          out.push("                hForeignKey NUMERIC(18,0) Not Null,");
+          out.push("                sNotes VarChar(2000) Not Null,");
+          out.push("                sNewValue VARCHAR(100),");
+          out.push("                sOldValue VARCHAR(100),");
+          out.push("                dtDate DATETIME");
+          out.push("        )");
+          out.push(
+            "Else If Not Exists (Select * From INFORMATION_SCHEMA.COLUMNS Where Table_Name = 'DataFixHistory' and Column_Name = 'sColumnName')",
+          );
+          out.push(
+            "        Alter Table DataFixHistory Add sColumnName VARCHAR(400) Null",
+            "",
+          );
+
+          const deleteTableCounts = {};
+          for (const q of queries) {
+            const type = getQueryType(q);
+            let backups = [];
+            if (type === "UPDATE") {
+              backups = generateUpdateBackup(q, metadata.caseId);
+            } else if (type === "DELETE") {
+              const tableName = extractTableFromDelete(q);
+              if (tableName) {
+                const count = deleteTableCounts[tableName.toLowerCase()] || 0;
+                backups = generateDeleteBackup(q, metadata.caseId, tableName, count);
+                deleteTableCounts[tableName.toLowerCase()] = count + 1;
+              }
+            } else if (type === "DROP") {
+              const parts = q.trim().split(/\s+/);
+              if (parts.length === 3) {
+                const tableName = parts[2].toLowerCase(),
+                  count = deleteTableCounts[tableName] || 0;
+                backups = generateDropBackup(metadata.caseId, tableName, count);
+                deleteTableCounts[tableName] = count + 1;
+              }
+            } else if (type === "ALTER") {
+              const parts = q.trim().split(/\s+/);
+              if (
+                parts.length === 6 &&
+                parts[3].toLowerCase() === "drop" &&
+                parts[4].toLowerCase() === "column"
+              ) {
+                const tableName = parts[2].toLowerCase(),
+                  columnName = parts[5].toLowerCase(),
+                  count = deleteTableCounts[tableName] || 0;
+                backups = generateAlterDropBackup(columnName, metadata.caseId, tableName, count);
+                deleteTableCounts[tableName] = count + 1;
+              }
+            } else if (q.toLowerCase().includes("yardi_delete_receipt")) {
+              const countT = deleteTableCounts["trans"] || 0,
+                countD = deleteTableCounts["detail"] || 0,
+                countG = deleteTableCounts["gldetail"] || 0;
+              backups = generateDeleteReceiptBackup(q, metadata.caseId, countT, countD, countG);
+              deleteTableCounts["trans"] = countT + 1;
+              deleteTableCounts["detail"] = countD + 1;
+              deleteTableCounts["gldetail"] = countG + 1;
+            }
+            for (const s of backups) {
+              out.push("GO", s, "");
+            }
+          }
+
+          out.push("GO");
+          let queryPos = 0;
+          for (const q of queries) {
+            while (blankPosSet.has(queryPos)) {
+              out.push("");
+              queryPos++;
+            }
+            out.push(q);
+            queryPos++;
+          }
+          out.push("Go", "//End SQL");
+          return out.join("\n");
+        }
+
+        // ── Auto-fill from emailed credentials ────────────────────────────────────────
+        function parseCredentials(text) {
+          const map = {};
+          for (const line of text.split("\n")) {
+            const colon = line.indexOf(":");
+            if (colon === -1) continue;
+            const key = line
+              .slice(0, colon)
+              .trim()
+              .toLowerCase()
+              .replace(/\s+/g, " ");
+            const val = line.slice(colon + 1).trim();
+            if (val) map[key] = val;
+          }
+          return map;
+        }
+
+        document
+          .getElementById("autoFillBtn")
+          .addEventListener("click", function () {
+            const text = document.getElementById("credInput").value.trim();
+            if (!text) return;
+            const c = parseCredentials(text);
+            const fill = function (id, key) {
+              if (c[key] !== undefined)
+                document.getElementById(id).value = c[key];
+            };
+            fill("clientPin", "client pin");
+            fill("clientName", "client name");
+            fill("dbUsername", "user name");
+            fill("dbPassword", "password");
+            fill("dbServer", "db server");
+            fill("dbName", "db name");
+          });
+
+        // ── UI ────────────────────────────────────────────────────────────────────────
+        const formCard = document.getElementById("formCard");
+        const resultCard = document.getElementById("resultCard");
+        const resultFN = document.getElementById("resultFilename");
+        let lastContent = "",
+          lastFilename = "";
+
+        document
+          .getElementById("pkgForm")
+          .addEventListener("submit", function (e) {
+            e.preventDefault();
+            const metadata = {
+              createdBy: document.getElementById("createdBy").value.trim(),
+              caseId: document.getElementById("caseId").value.trim(),
+              clientPin: document.getElementById("clientPin").value.trim(),
+              clientName: document.getElementById("clientName").value.trim(),
+              username: document.getElementById("dbUsername").value.trim(),
+              password: document.getElementById("dbPassword").value.trim(),
+              dbServer: document.getElementById("dbServer").value.trim(),
+              dbName: document.getElementById("dbName").value.trim(),
+              description: document.getElementById("description").value.trim(),
+            };
+            const raw = document.getElementById("sqlQueries").value;
+            const sqlResult = raw.trim()
+              ? extractSqlQueries(raw.trim().split("\n"))
+              : [[], new Set([-1])];
+            lastContent = generateOutput(metadata, sqlResult);
+            lastFilename = "Case#" + metadata.caseId + "#Datafix.pkg";
+            resultFN.textContent = lastFilename;
+            formCard.style.display = "none";
+            resultCard.style.display = "block";
+            document.getElementById("siteFooter").style.display = "none";
+          });
+
+        document.getElementById("dlBtn").addEventListener("click", function () {
+          const blob = new Blob([lastContent], { type: "text/plain" });
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(blob);
+          a.download = lastFilename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(a.href);
+        });
+
+        document
+          .getElementById("backBtn")
+          .addEventListener("click", function () {
+            resultCard.style.display = "none";
+            formCard.style.display = "block";
+            document.getElementById("siteFooter").style.display = "";
+          });
+      })();
+    </script>
+  </body>
+</html>
